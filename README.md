@@ -1,2 +1,2 @@
 # restful-client
-Restful WS java client sample
+Restful Client
