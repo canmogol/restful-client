@@ -34,7 +34,8 @@
                             <sourceRoot>${basedir}/target/generated-sources/src/main/java</sourceRoot>
                             <wadlOptions>
                                 <wadlOption>
-                                    <wadl>http://localhost:8080/restful-server-city/application.wadl</wadl>
+                                    <wadl>${project.basedir}/../restful-server-city/target/restful-server-city/application.wadl</wadl>
+                                    <!--<wadl>http://localhost:8080/restful-server-city/application.wadl</wadl>-->
                                     <interface>true</interface>
                                 </wadlOption>
                             </wadlOptions>
