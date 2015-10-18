@@ -1,6 +1,8 @@
 package com.restful.client;
 
 
+import com.fererlab.car.dto.CarDTO;
+import com.fererlab.car.restful.CarResource;
 import com.fererlab.city.dto.CityIdIntegerDTO;
 import com.fererlab.city.dto.CityIdLongDTO;
 import com.fererlab.city.restful.CityResource;
@@ -16,6 +18,7 @@ public class Client {
         Client client = new Client();
         client.runMultipleEntityTypeExample();
         client.runBlockingRequestResponseExample();
+        client.runBlockingRequestResponseGenericExample();
     }
 
     private void runMultipleEntityTypeExample() {
@@ -55,6 +58,32 @@ public class Client {
         UserDTO deletedUserDTO = resource.delete(updatedUserDTO.getId());
         System.out.println(ToStringBuilder.reflectionToString(deletedUserDTO));
 
+    }
+
+
+    private void runBlockingRequestResponseGenericExample() {
+        // get a resource to call
+        CarResource resource = Resources.create(CarResource.class, url);
+
+        // create a car
+        CarDTO createCarDTO = new CarDTO();
+        createCarDTO.setManufacturer("SAAB");
+        createCarDTO.setModel(1999);
+        CarDTO newCarDTO = resource.create(createCarDTO);
+        System.out.println(ToStringBuilder.reflectionToString(newCarDTO));
+
+        // find the created car
+        CarDTO foundCarDTO = resource.find(newCarDTO.getId());
+        System.out.println(ToStringBuilder.reflectionToString(foundCarDTO));
+
+        // update car
+        foundCarDTO.setModel(2000);
+        CarDTO updatedCarDTO = resource.update(foundCarDTO);
+        System.out.println(ToStringBuilder.reflectionToString(updatedCarDTO));
+
+        // delete car
+        CarDTO deletedCarDTO = resource.delete(updatedCarDTO.getId());
+        System.out.println(ToStringBuilder.reflectionToString(deletedCarDTO));
     }
 
 }
