@@ -10,6 +10,16 @@ import com.fererlab.user.dto.UserDTO;
 import com.fererlab.user.restful.UserResource;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import javax.ws.rs.client.AsyncInvoker;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.InvocationCallback;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 public class Client {
 
     private String url = "http://localhost:8080/restful-server/api/";
@@ -19,6 +29,33 @@ public class Client {
         client.runMultipleEntityTypeExample();
         client.runBlockingRequestResponseExample();
         client.runBlockingRequestResponseGenericExample();
+        client.runAsyncServerBlockingClient();
+        client.runAsyncServerBlockingAsyncClient();
+    }
+
+    private void runAsyncServerBlockingAsyncClient() {
+        WebTarget target = ClientBuilder.newClient().target("http://localhost:8080/restful-server/api/async/");
+        AsyncInvoker asyncInvoker = target.path("/executorRunnable").request().async();
+        System.out.println("request is being processed asynchronously.");
+        Future<String> responseFuture = asyncInvoker.get(
+                new InvocationCallback<String>() {
+                    @Override
+                    public void completed(String response) {
+                        System.out.println("------ response: " + response);
+                    }
+
+                    @Override
+                    public void failed(Throwable e) {
+                        System.out.println("Exception: " + e.getMessage());
+                    }
+                }
+        );
+        try {
+            responseFuture.get(10, TimeUnit.SECONDS);
+            System.out.println("response received");
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            System.out.println("Exception: " + e.getMessage());
+        }
     }
 
     private void runMultipleEntityTypeExample() {
@@ -84,6 +121,19 @@ public class Client {
         // delete car
         CarDTO deletedCarDTO = resource.delete(updatedCarDTO.getId());
         System.out.println(ToStringBuilder.reflectionToString(deletedCarDTO));
+    }
+
+    private void runAsyncServerBlockingClient() {
+        WebTarget target = ClientBuilder.newClient().target("http://localhost:8080/restful-server/api/async/");
+        final AsyncInvoker asyncInvoker = target.path("/executorRunnable").request().async();
+        final Future<Response> responseFuture = asyncInvoker.get();
+        System.out.println("Request is being processed asynchronously.");
+        try {
+            final Response response = responseFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            System.out.println("Exception: " + e.getMessage());
+        }
+        System.out.println("Response received.");
     }
 
 }
