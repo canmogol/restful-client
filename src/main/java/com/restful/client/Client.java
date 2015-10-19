@@ -1,6 +1,8 @@
 package com.restful.client;
 
 
+import com.fererlab.async.dto.AsyncRequestDTO;
+import com.fererlab.async.dto.AsyncResponseDTO;
 import com.fererlab.car.dto.CarDTO;
 import com.fererlab.car.restful.CarResource;
 import com.fererlab.city.dto.CityIdIntegerDTO;
@@ -9,11 +11,12 @@ import com.fererlab.city.restful.CityResource;
 import com.fererlab.user.dto.UserDTO;
 import com.fererlab.user.restful.UserResource;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
-import javax.ws.rs.client.AsyncInvoker;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.client.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -30,12 +33,15 @@ public class Client {
         client.runBlockingRequestResponseExample();
         client.runBlockingRequestResponseGenericExample();
         client.runAsyncServerBlockingClient();
-        client.runAsyncServerBlockingAsyncClient();
+        client.runAsyncServerNonBlockingClient();
     }
 
     private void runMultipleEntityTypeExample() {
+        ResteasyClient client = new ResteasyClientBuilder().build();
+        ResteasyWebTarget target = client.target(url);
+
         // get a resource to call
-        CityResource resource = Resources.create(CityResource.class, url);
+        CityResource resource = target.proxy(CityResource.class);
 
         // get city with integer type id
         CityIdIntegerDTO cityIdIntegerDTO = resource.createModelWithID();
@@ -47,8 +53,10 @@ public class Client {
     }
 
     private void runBlockingRequestResponseExample() {
+        ResteasyClient client = new ResteasyClientBuilder().build();
+        ResteasyWebTarget target = client.target(url);
         // get a resource to call
-        UserResource resource = Resources.create(UserResource.class, url);
+        UserResource resource = target.proxy(UserResource.class);
 
         // create a user
         UserDTO createUserDTO = new UserDTO();
@@ -72,10 +80,11 @@ public class Client {
 
     }
 
-
     private void runBlockingRequestResponseGenericExample() {
+        ResteasyClient client = new ResteasyClientBuilder().build();
+        ResteasyWebTarget target = client.target(url);
         // get a resource to call
-        CarResource resource = Resources.create(CarResource.class, url);
+        CarResource resource = target.proxy(CarResource.class);
 
         // create a car
         CarDTO createCarDTO = new CarDTO();
@@ -99,9 +108,10 @@ public class Client {
     }
 
     private void runAsyncServerBlockingClient() {
-        WebTarget target = ClientBuilder.newClient().target("http://localhost:8080/restful-server/api/async/");
-        final AsyncInvoker asyncInvoker = target.path("/executorRunnable").request().async();
-        final Future<Response> responseFuture = asyncInvoker.get();
+        WebTarget target = ClientBuilder.newClient().target(url);
+        final AsyncInvoker asyncInvoker = target.path("/async/executorRunnable").request().async();
+        Entity entity = Entity.entity("John", MediaType.WILDCARD_TYPE);
+        final Future<Response> responseFuture = asyncInvoker.post(entity);
         System.out.println("Async server, blocking client, begin");
         try {
             Response response = responseFuture.get();
@@ -113,35 +123,26 @@ public class Client {
         System.out.println("Async server, blocking client, end");
     }
 
-    private void runAsyncServerBlockingAsyncClient() {
-        WebTarget target = ClientBuilder.newClient().target("http://localhost:8080/restful-server/api/async/");
-        AsyncInvoker asyncInvoker = target.path("/executorRunnable").request().async();
-        System.out.println("Async server, non-blocking client, begin");
-        Future<String> responseFuture = asyncInvoker.get(
-                new InvocationCallback<String>() {
+    private void runAsyncServerNonBlockingClient() {
+        ResteasyClient client = new ResteasyClientBuilder().build();
+        ResteasyWebTarget target = client.target(url).path("/async/sayHi");
+        target.queryParam("name", "john");
+        AsyncRequestDTO asyncRequestDTO = new AsyncRequestDTO();
+        asyncRequestDTO.setRequest("john");
+        Entity entity = Entity.entity(asyncRequestDTO, MediaType.APPLICATION_JSON);
+        target.request().async().post(
+                entity,
+                new InvocationCallback<AsyncResponseDTO>() {
                     @Override
-                    public void completed(String response) {
-                        System.out.println("got response: " + response);
+                    public void completed(AsyncResponseDTO response) {
+                        System.out.println(response.getResponse());
                     }
 
                     @Override
-                    public void failed(Throwable e) {
-                        System.out.println("Exception: " + e.getMessage());
+                    public void failed(Throwable throwable) {
+                        System.out.println("Exception: " + throwable.getMessage());
                     }
-                }
-        );
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    responseFuture.get(); // this will block current thread until it gets response or the timeout reaches
-                } catch (InterruptedException | ExecutionException e) {
-                    System.out.println("Exception: " + e.getMessage());
-                }
-            }
-        }.start();
-        System.out.println("Async server, non-blocking client, end");
-
+                });
     }
 
 }
