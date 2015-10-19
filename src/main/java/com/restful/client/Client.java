@@ -48,6 +48,9 @@ public class Client {
         pool.execute(new WebSocketPublisher(websocketURL));
         pool.execute(new WebSocketSubscriber(websocketURL));
         pool.execute(new WebSocketSubscriber(websocketURL));
+
+        pool.execute(new WebSocketStreamClient(websocketURL));
+
     }
 
 }
