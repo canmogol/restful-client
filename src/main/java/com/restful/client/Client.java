@@ -33,31 +33,6 @@ public class Client {
         client.runAsyncServerBlockingAsyncClient();
     }
 
-    private void runAsyncServerBlockingAsyncClient() {
-        WebTarget target = ClientBuilder.newClient().target("http://localhost:8080/restful-server/api/async/");
-        AsyncInvoker asyncInvoker = target.path("/executorRunnable").request().async();
-        System.out.println("request is being processed asynchronously.");
-        Future<String> responseFuture = asyncInvoker.get(
-                new InvocationCallback<String>() {
-                    @Override
-                    public void completed(String response) {
-                        System.out.println("------ response: " + response);
-                    }
-
-                    @Override
-                    public void failed(Throwable e) {
-                        System.out.println("Exception: " + e.getMessage());
-                    }
-                }
-        );
-        try {
-            responseFuture.get(10, TimeUnit.SECONDS);
-            System.out.println("response received");
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            System.out.println("Exception: " + e.getMessage());
-        }
-    }
-
     private void runMultipleEntityTypeExample() {
         // get a resource to call
         CityResource resource = Resources.create(CityResource.class, url);
@@ -127,13 +102,46 @@ public class Client {
         WebTarget target = ClientBuilder.newClient().target("http://localhost:8080/restful-server/api/async/");
         final AsyncInvoker asyncInvoker = target.path("/executorRunnable").request().async();
         final Future<Response> responseFuture = asyncInvoker.get();
-        System.out.println("Request is being processed asynchronously.");
+        System.out.println("Async server, blocking client, begin");
         try {
-            final Response response = responseFuture.get();
-        } catch (InterruptedException | ExecutionException e) {
+            Response response = responseFuture.get();
+            responseFuture.get(10, TimeUnit.SECONDS); // block for max 10 seconds
+            System.out.println("got response: " + response);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             System.out.println("Exception: " + e.getMessage());
         }
-        System.out.println("Response received.");
+        System.out.println("Async server, blocking client, end");
+    }
+
+    private void runAsyncServerBlockingAsyncClient() {
+        WebTarget target = ClientBuilder.newClient().target("http://localhost:8080/restful-server/api/async/");
+        AsyncInvoker asyncInvoker = target.path("/executorRunnable").request().async();
+        System.out.println("Async server, non-blocking client, begin");
+        Future<String> responseFuture = asyncInvoker.get(
+                new InvocationCallback<String>() {
+                    @Override
+                    public void completed(String response) {
+                        System.out.println("got response: " + response);
+                    }
+
+                    @Override
+                    public void failed(Throwable e) {
+                        System.out.println("Exception: " + e.getMessage());
+                    }
+                }
+        );
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    responseFuture.get(); // this will block current thread until it gets response or the timeout reaches
+                } catch (InterruptedException | ExecutionException e) {
+                    System.out.println("Exception: " + e.getMessage());
+                }
+            }
+        }.start();
+        System.out.println("Async server, non-blocking client, end");
+
     }
 
 }
