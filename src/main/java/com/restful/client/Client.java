@@ -10,7 +10,8 @@ public class Client {
 
     ExecutorService pool = Executors.newCachedThreadPool();
 
-    private String url = "http://localhost:8080/restful-server/api/";
+    private String restfulWebServiceURL = "http://localhost:8080/restful-server/api/";
+    private String websocketURL = "ws://localhost:8080/restful-server/";
 
     public static void main(String[] args) {
         Client client = new Client();
@@ -18,11 +19,35 @@ public class Client {
     }
 
     private void runExamples() {
-        pool.execute(new MultipleEntityType(url));
-        pool.execute(new BlockingRequestResponse(url));
-        pool.execute(new BlockingRequestResponseGeneric(url));
-        pool.execute(new AsyncServerBlockingClient(url));
-        pool.execute(new AsyncServerNonBlockingClient(url));
+
+        // BELOW ARE RESTFUL WEB SERVICE EXAMPLES (RWS)
+
+        // multiple entity types with different method signatures rws
+        pool.execute(new MultipleEntityType(restfulWebServiceURL));
+
+        // single entity blocking rws
+        pool.execute(new BlockingRequestResponse(restfulWebServiceURL));
+
+        // generic impl for rws
+        pool.execute(new BlockingRequestResponseGeneric(restfulWebServiceURL));
+
+        // async server for blocking client rws
+        pool.execute(new AsyncServerBlockingClient(restfulWebServiceURL));
+
+        // async server and non-blocking client rws
+        pool.execute(new AsyncServerNonBlockingClient(restfulWebServiceURL));
+
+
+        // BELOW ARE WEB SOCKET EXAMPLES (WS)
+
+        // single web socket client
+        pool.execute(new WebSocketSingleClient(websocketURL));
+
+        // below is the test for 3 subscribers and 1 publisher, start order is not important
+        pool.execute(new WebSocketSubscriber(websocketURL));
+        pool.execute(new WebSocketPublisher(websocketURL));
+        pool.execute(new WebSocketSubscriber(websocketURL));
+        pool.execute(new WebSocketSubscriber(websocketURL));
     }
 
 }
