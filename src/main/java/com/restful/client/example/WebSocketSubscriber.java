@@ -23,7 +23,6 @@ public class WebSocketSubscriber implements Runnable {
         try {
             URI url = new URI(websocketURL + "websocket-pubsub");
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-            ClientEndpointConfig clientEndpointConfig = ClientEndpointConfig.Builder.create().build();
             Session session = container.connectToServer(WebsocketClientEndpoint.class, url);
             session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override

@@ -37,6 +37,8 @@ public class Client {
         // async server and non-blocking client rws
         pool.execute(new AsyncServerNonBlockingClient(restfulWebServiceURL));
 
+        // multiple inheritance client rws
+        pool.execute(new InheritanceClient(restfulWebServiceURL));
 
         // BELOW ARE WEB SOCKET EXAMPLES (WS)
 

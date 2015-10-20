@@ -25,7 +25,6 @@ public class WebSocketStreamClient implements Runnable {
         try {
             URI url = new URI(websocketURL + "websocket-stream");
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-            ClientEndpointConfig clientEndpointConfig = ClientEndpointConfig.Builder.create().build();
             Session session = container.connectToServer(WebsocketClientEndpoint.class, url);
             session.addMessageHandler(new MessageHandler.Partial<byte[]>() {
                 @Override
