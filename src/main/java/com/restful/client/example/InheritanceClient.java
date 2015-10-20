@@ -14,6 +14,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJacksonProvider;
 
+import javax.ws.rs.core.Response;
+
 public class InheritanceClient implements Runnable {
 
     private Log log = LogFactory.getLog(InheritanceClient.class);
@@ -45,10 +47,19 @@ public class InheritanceClient implements Runnable {
         // get a resource to call
         AnimalResource resource = target.proxy(AnimalResource.class);
 
-        // get city with integer type id
-        Object o = resource.get();
-        Zoo zoo = (Zoo) o;
+        // get response, this response has @CLASS
+        Zoo zoo = resource.getZoo();
         log.info(ToStringBuilder.reflectionToString(zoo));
+
+        // below two do not have @CLASS since they don't have @XmlRootElement
+        // annotation at server side, JacksonJsonProvider chooses the ObjectMapper according to annotation
+
+        // get response
+        String hi = resource.hi();
+        log.info(hi);
+        // get response
+        Response response = resource.list();
+        log.info(response.getEntity());
 
     }
 }
