@@ -2,9 +2,14 @@ package com.restful.client.example;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.jsontype.TypeResolverBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.plugins.providers.jackson.ResteasyJacksonProvider;
 
 import javax.ws.rs.client.AsyncInvoker;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -29,7 +34,20 @@ public class AsyncServerBlockingClient implements Runnable {
     @Override
     public void run() {
         log.info(">>> " + getClass().getSimpleName() + " BEGIN");
-        WebTarget target = ClientBuilder.newClient().target(url);
+        ResteasyClient client = new ResteasyClientBuilder().build();
+
+        // add @CLASS property to requested json
+        ResteasyJacksonProvider resteasyJacksonProvider = new ResteasyJacksonProvider();
+        ObjectMapper mapper = new ObjectMapper();
+        TypeResolverBuilder<?> typeResolver = new CustomTypeResolverBuilder();
+        typeResolver.init(JsonTypeInfo.Id.CLASS, null);
+        typeResolver.inclusion(JsonTypeInfo.As.PROPERTY);
+        typeResolver.typeProperty("@CLASS");
+        mapper.setDefaultTyping(typeResolver);
+        resteasyJacksonProvider.setMapper(mapper);
+        client.register(resteasyJacksonProvider);
+
+        WebTarget target = client.target(url);
         AsyncInvoker asyncInvoker = target.path("/async/executorRunnable").request().async();
         Entity entity = Entity.entity("John", MediaType.APPLICATION_JSON);
         Future<String> responseFuture = asyncInvoker.post(entity, String.class);

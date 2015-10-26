@@ -23,40 +23,40 @@ public class Client {
         // BELOW ARE RESTFUL WEB SERVICE EXAMPLES (RWS)
 
         // multiple entity types with different method signatures rws
-        pool.execute(new MultipleEntityType(restfulWebServiceURL));
+        new MultipleEntityType(restfulWebServiceURL).run();
 
         // single entity blocking rws
-        pool.execute(new BlockingRequestResponse(restfulWebServiceURL));
+        new BlockingRequestResponse(restfulWebServiceURL).run();
 
         // generic impl for rws
-        pool.execute(new BlockingRequestResponseGeneric(restfulWebServiceURL));
+        new BlockingRequestResponseGeneric(restfulWebServiceURL).run();
 
         // async server for blocking client rws
-        pool.execute(new AsyncServerBlockingClient(restfulWebServiceURL));
+        new AsyncServerBlockingClient(restfulWebServiceURL).run();
 
         // async server and non-blocking client rws
-        pool.execute(new AsyncServerNonBlockingClient(restfulWebServiceURL));
+        new AsyncServerNonBlockingClient(restfulWebServiceURL).run();
 
         // multiple inheritance client rws
-        pool.execute(new InheritanceClient(restfulWebServiceURL));
+        new InheritanceClient(restfulWebServiceURL).run();
 
         // BELOW ARE WEB SOCKET EXAMPLES (WS)
 
         // single web socket client
-        pool.execute(new WebSocketSingleClient(websocketURL));
+        new WebSocketSingleClient(websocketURL).run();
 
         // below is the test for 3 subscribers and 1 publisher, start order is not important
-        pool.execute(new WebSocketSubscriber(websocketURL));
-        pool.execute(new WebSocketPublisher(websocketURL));
-        pool.execute(new WebSocketSubscriber(websocketURL));
-        pool.execute(new WebSocketSubscriber(websocketURL));
+        new WebSocketSubscriber(websocketURL).run();
+        new WebSocketPublisher(websocketURL).run();
+        new WebSocketSubscriber(websocketURL).run();
+        new WebSocketSubscriber(websocketURL).run();
 
         // below are web socket sample clients
-        pool.execute(new WebSocketStreamPartByPartClient(websocketURL));
-        pool.execute(new WebSocketStreamWholeMessageClient(websocketURL));
+        new WebSocketStreamPartByPartClient(websocketURL).run();
+        new WebSocketStreamWholeMessageClient(websocketURL).run();
         // using device simulator
-        pool.execute(new WebSocketStreamDevicePartByPartClient(websocketURL));
-        pool.execute(new WebSocketStreamDeviceWholeMessageClient(websocketURL));
+        new WebSocketStreamDevicePartByPartClient(websocketURL).run();
+        new WebSocketStreamDeviceWholeMessageClient(websocketURL).run();
 
     }
 

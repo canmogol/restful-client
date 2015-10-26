@@ -1,6 +1,7 @@
 package com.restful.client.example;
 
 
+import com.fererlab.animal.dto.GenericList;
 import com.fererlab.animal.dto.Zoo;
 import com.fererlab.animal.restful.AnimalResource;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -13,8 +14,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJacksonProvider;
-
-import javax.ws.rs.core.Response;
 
 public class InheritanceClient implements Runnable {
 
@@ -30,6 +29,9 @@ public class InheritanceClient implements Runnable {
     public void run() {
         log.info(">>> " + getClass().getSimpleName() + " BEGIN");
 
+        ResteasyClient client = new ResteasyClientBuilder().build();
+
+        // add @CLASS property to requested json
         ResteasyJacksonProvider resteasyJacksonProvider = new ResteasyJacksonProvider();
         ObjectMapper mapper = new ObjectMapper();
         TypeResolverBuilder<?> typeResolver = new CustomTypeResolverBuilder();
@@ -38,10 +40,8 @@ public class InheritanceClient implements Runnable {
         typeResolver.typeProperty("@CLASS");
         mapper.setDefaultTyping(typeResolver);
         resteasyJacksonProvider.setMapper(mapper);
-
-        ResteasyClient client = new ResteasyClientBuilder().build();
-
         client.register(resteasyJacksonProvider);
+
         ResteasyWebTarget target = client.target(url);
 
         // get a resource to call
@@ -58,8 +58,8 @@ public class InheritanceClient implements Runnable {
         String hi = resource.hi();
         log.info(hi);
         // get response
-        Response response = resource.list();
-        log.info(response.getEntity());
+        GenericList response = resource.list();
+        log.info(response.getList());
 
     }
 }
