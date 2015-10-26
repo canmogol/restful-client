@@ -51,7 +51,12 @@ public class Client {
         pool.execute(new WebSocketSubscriber(websocketURL));
         pool.execute(new WebSocketSubscriber(websocketURL));
 
-        pool.execute(new WebSocketStreamClient(websocketURL));
+        // below are web socket sample clients
+        pool.execute(new WebSocketStreamPartByPartClient(websocketURL));
+        pool.execute(new WebSocketStreamWholeMessageClient(websocketURL));
+        // using device simulator
+        pool.execute(new WebSocketStreamDevicePartByPartClient(websocketURL));
+        pool.execute(new WebSocketStreamDeviceWholeMessageClient(websocketURL));
 
     }
 

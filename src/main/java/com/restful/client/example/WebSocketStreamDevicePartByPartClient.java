@@ -10,12 +10,12 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
-public class WebSocketStreamClient implements Runnable {
+public class WebSocketStreamDevicePartByPartClient implements Runnable {
 
     private final String websocketURL;
-    private Log log = LogFactory.getLog(WebSocketStreamClient.class);
+    private Log log = LogFactory.getLog(WebSocketStreamDevicePartByPartClient.class);
 
-    public WebSocketStreamClient(String websocketURL) {
+    public WebSocketStreamDevicePartByPartClient(String websocketURL) {
         this.websocketURL = websocketURL;
     }
 
@@ -23,7 +23,7 @@ public class WebSocketStreamClient implements Runnable {
     public void run() {
         log.info(">>> " + getClass().getSimpleName() + " BEGIN");
         try {
-            URI url = new URI(websocketURL + "websocket-stream");
+            URI url = new URI(websocketURL + "websocket-stream-device");
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             Session session = container.connectToServer(WebsocketClientEndpoint.class, url);
             session.addMessageHandler(new MessageHandler.Partial<byte[]>() {
@@ -36,16 +36,16 @@ public class WebSocketStreamClient implements Runnable {
             byte[] bytes = new byte[140960];
             new Random().nextBytes(bytes);
             session.getAsyncRemote().sendBinary(ByteBuffer.wrap(bytes));
+            Thread.sleep(2000);
+            new Random().nextBytes(bytes);
             session.getAsyncRemote().sendBinary(ByteBuffer.wrap(bytes));
+            Thread.sleep(2000);
+            new Random().nextBytes(bytes);
             session.getAsyncRemote().sendBinary(ByteBuffer.wrap(bytes));
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            session.getAsyncRemote().sendBinary(ByteBuffer.wrap(new byte[]{1}));
+            Thread.sleep(2000);
+            session.close();
 
-        } catch (IOException | DeploymentException | URISyntaxException e) {
+        } catch (IOException | DeploymentException | URISyntaxException | InterruptedException e) {
             log.error("Exception e: " + e.getMessage());
         }
         log.info("<<< " + getClass().getSimpleName() + " END");
