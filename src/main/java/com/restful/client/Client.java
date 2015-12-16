@@ -3,12 +3,7 @@ package com.restful.client;
 
 import com.restful.client.example.*;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 public class Client {
-
-    ExecutorService pool = Executors.newCachedThreadPool();
 
     private String restfulWebServiceURL = "http://localhost:8080/restful-server/api/";
     private String websocketURL = "ws://localhost:8080/restful-server/";
@@ -19,6 +14,13 @@ public class Client {
     }
 
     private void runExamples() {
+
+        // BELOW IS RESTFUL WEB IMAGE UPLOAD DOWNLOAD EXAMPLE
+
+        // blocking file upload download rws
+        new BlockingImageUploadDownload(restfulWebServiceURL).run();
+
+
 
         // BELOW ARE RESTFUL WEB SERVICE EXAMPLES (RWS)
 
@@ -39,6 +41,8 @@ public class Client {
 
         // multiple inheritance client rws
         new InheritanceClient(restfulWebServiceURL).run();
+
+
 
         // BELOW ARE WEB SOCKET EXAMPLES (WS)
 
