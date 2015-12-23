@@ -1,5 +1,6 @@
 package com.restful.client.example;
 
+import com.fererlab.core.exception.ServiceException;
 import com.fererlab.user.restful.UserResource;
 import com.fererlab.user.serviceengine.dto.UserDTO;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -12,6 +13,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJacksonProvider;
+
+import javax.ws.rs.InternalServerErrorException;
 
 /**
  * blocking request and response example for single model
@@ -50,8 +53,27 @@ public class BlockingRequestResponse implements Runnable {
         UserDTO createUserDTO = new UserDTO();
         createUserDTO.setUsername("john");
         createUserDTO.setPassword("123");
-        UserDTO newUserDTO = resource.create(createUserDTO);
-        log.info(ToStringBuilder.reflectionToString(newUserDTO));
+        UserDTO newUserDTO = null;
+        try {
+            newUserDTO = resource.create(createUserDTO);
+            log.info(ToStringBuilder.reflectionToString(newUserDTO));
+        } catch (InternalServerErrorException e) {
+            ServiceException serverErrorException = new ServiceException(e);
+            switch (serverErrorException.getErrorCode()) {
+                case DB:
+                    System.out.println("database error: " + serverErrorException.getMessage());
+                    break;
+                case WS:
+                    System.out.println("web service error: " + serverErrorException.getMessage());
+                    break;
+                case AUTHENTICATION:
+                    System.out.println("authentication error: " + serverErrorException.getMessage());
+                    break;
+                default:
+                    System.out.println("error: " + serverErrorException.getMessage());
+                    break;
+            }
+        }
 
         // find the created user
         UserDTO foundUserDTO = resource.find(newUserDTO.getId());
