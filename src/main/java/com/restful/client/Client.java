@@ -29,7 +29,7 @@ public class Client {
         // single entity blocking rws
         new BlockingRequestResponse(restfulWebServiceURL).run();
 
-        // throw server exception handled at client side sample
+        // server exception handled at client side
         new ServerExceptionRequest(restfulWebServiceURL).run();
 
         // generic impl for rws
