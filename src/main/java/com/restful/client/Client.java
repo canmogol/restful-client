@@ -21,7 +21,6 @@ public class Client {
         new BlockingImageUploadDownload(restfulWebServiceURL).run();
 
 
-
         // BELOW ARE RESTFUL WEB SERVICE EXAMPLES (RWS)
 
         // multiple entity types with different method signatures rws
@@ -29,6 +28,9 @@ public class Client {
 
         // single entity blocking rws
         new BlockingRequestResponse(restfulWebServiceURL).run();
+
+        // throw server exception handled at client side sample
+        new ServerExceptionRequest(restfulWebServiceURL).run();
 
         // generic impl for rws
         new BlockingRequestResponseGeneric(restfulWebServiceURL).run();
@@ -41,7 +43,6 @@ public class Client {
 
         // multiple inheritance client rws
         new InheritanceClient(restfulWebServiceURL).run();
-
 
 
         // BELOW ARE WEB SOCKET EXAMPLES (WS)

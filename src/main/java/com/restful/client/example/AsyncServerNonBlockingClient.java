@@ -54,12 +54,12 @@ public class AsyncServerNonBlockingClient implements Runnable {
                 new InvocationCallback<AsyncResponseDTO>() {
                     @Override
                     public void completed(AsyncResponseDTO response) {
-                        log.info(response.getResponse());
+                        log.info("Received AsyncResponseDTO: "+response.getResponse());
                     }
 
                     @Override
                     public void failed(Throwable throwable) {
-                        log.info("Exception: " + throwable.getMessage());
+                        log.info("Received Exception: " + throwable.getMessage());
                     }
                 });
         log.info("<<< " + getClass().getSimpleName() + " END");
