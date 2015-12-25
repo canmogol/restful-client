@@ -57,29 +57,34 @@ public class ServerError {
         return errorMessages;
     }
 
+    @SuppressWarnings("unchecked")
     public Exception getRootException() {
         if (rootException instanceof WebApplicationException && exceptionClasses.length > 0) {
             try {
                 String rootExceptionClassName = exceptionClasses[exceptionClasses.length - 1];
-                Class<?> clazz = Class.forName(rootExceptionClassName);
-                if (Exception.class.isAssignableFrom(clazz)) {
-                    Constructor<?> constructor = null;
-                    try {
-                        constructor = clazz.getConstructor(String.class);
-                        String messages = "";
-                        for (String message : getErrorMessages()) {
-                            messages += message + ", ";
+                try {
+                    rootException = ((WebApplicationException) rootException).getResponse().readEntity(Exception.class);
+                } catch (Exception tryConstructor) {
+                    Class<? extends Exception> clazz = (Class<? extends Exception>) Class.forName(rootExceptionClassName);
+                    if (Exception.class.isAssignableFrom(clazz)) {
+                        Constructor<?> constructor = null;
+                        try {
+                            constructor = clazz.getConstructor(String.class);
+                            String messages = "";
+                            for (String message : getErrorMessages()) {
+                                messages += message + ", ";
+                            }
+                            rootException = (Exception) constructor.newInstance(messages);
+                        } catch (NoSuchMethodException e) {
+                            // ignore this exception, we will raise another if we cannot find the default constructor
                         }
-                        rootException = (Exception) constructor.newInstance(messages);
-                    } catch (NoSuchMethodException e) {
-                        // ignore this exception, we will raise another if we cannot find the default constructor
+                        if (constructor == null) {
+                            constructor = clazz.getConstructor();
+                            rootException = (Exception) constructor.newInstance();
+                        }
+                    } else {
+                        // this is not an Exception class, do nothing
                     }
-                    if (constructor == null) {
-                        constructor = clazz.getConstructor();
-                        rootException = (Exception) constructor.newInstance();
-                    }
-                } else {
-                    // this is not an Exception class, do nothing
                 }
             } catch (NoSuchMethodException | InvocationTargetException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 // we can safely ignore this exception, it means this type of exception is not available for client, root exception stays as WebApplicationException
