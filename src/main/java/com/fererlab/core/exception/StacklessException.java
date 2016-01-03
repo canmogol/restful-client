@@ -11,6 +11,10 @@ public class StacklessException extends Exception {
         super(message);
     }
 
+    public StacklessException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     public StackTraceElement[] getStackTrace() {
         return super.getStackTrace();
     }
